@@ -11,7 +11,7 @@ defmodule Deepltgbot.Application do
       # This will setup the Registry.ExGram
       ExGram,
       {Deepltgbot.Bot,
-       [method: :polling, token: "5394215074:AAGmlaQAYsQtAFkyinh3h211VTOzOjFykQo"]}
+       [method: :polling, token: System.get_env("BOT_TOKEN")]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
