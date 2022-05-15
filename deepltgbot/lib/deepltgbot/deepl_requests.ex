@@ -9,6 +9,12 @@ defmodule Deepltgbot.DeeplRequests do
 
   plug(Tesla.Middleware.FormUrlencoded)
 
+  def get_languages() do
+    response_tuple = post("/languages", %{type: "source"})
+
+    check_and_decode(response_tuple)
+  end
+
   def translate(text, source_lang, target_lang) do
     response_tuple =
       post("/translate", %{text: text, source_lang: source_lang, target_lang: target_lang})

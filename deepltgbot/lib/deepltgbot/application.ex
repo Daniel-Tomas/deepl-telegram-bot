@@ -10,8 +10,7 @@ defmodule Deepltgbot.Application do
     children = [
       # This will setup the Registry.ExGram
       ExGram,
-      {Deepltgbot.Bot,
-       [method: :polling, token: System.get_env("BOT_TOKEN")]}
+      {Deepltgbot.Bot, [method: :polling, token: System.get_env("BOT_TOKEN")]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

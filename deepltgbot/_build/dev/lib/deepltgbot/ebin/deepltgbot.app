@@ -2,8 +2,10 @@
              [{applications,[kernel,stdlib,elixir,logger,ex_gram,tesla,
                              hackney,jason]},
               {description,"deepltgbot"},
-              {modules,['Elixir.Deepltgbot','Elixir.Deepltgbot.Application',
-                        'Elixir.Deepltgbot.Bot']},
+              {modules,['Elixir.Deepltgbot.Application',
+                        'Elixir.Deepltgbot.Bot',
+                        'Elixir.Deepltgbot.DeeplRequests',
+                        'Elixir.Deepltgbot.Utils']},
               {registered,[]},
               {vsn,"0.1.0"},
               {mod,{'Elixir.Deepltgbot.Application',[]}}]}.
