@@ -1,5 +1,25 @@
 defmodule Deepltgbot.Utils do
+  alias Decimal
   alias Deepltgbot.DeeplRequests
+
+
+  def get_progress_bar_str(ratio_progress, bar_length \\ 20, fill_char \\ "▮", empty_char \\ "▯") do
+    filled_length = trunc(bar_length * ratio_progress)
+    empty_length = bar_length - filled_length
+    IO.puts(filled_length)
+    IO.puts(empty_length)
+
+    progress_bar =
+      String.duplicate(fill_char, filled_length) <> String.duplicate(empty_char, empty_length)
+
+    percentage_progress_rounded =
+      (ratio_progress * 100)
+      |> Decimal.from_float()
+      |> Decimal.round(2)
+      |> Decimal.to_float()
+
+    _progress_bar_line = "|#{progress_bar}| #{percentage_progress_rounded}%"
+  end
 
   def parse_languages(api_response) do
     names_list = for map <- api_response, do: map["name"] <> " \u{27A1} "

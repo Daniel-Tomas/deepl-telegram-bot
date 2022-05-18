@@ -28,6 +28,20 @@ defmodule Deepltgbot.Bot do
     """)
   end
 
+  def handle({:command, :getusage, _msg}, context) do
+    api_response = DeeplRequests.get_usage()
+
+    ratio_progress = api_response["character_count"] / api_response["character_limit"]
+
+    answer_str = """
+    DeepL API usage:
+    #{Utils.get_progress_bar_str(ratio_progress)}
+    """
+
+    IO.puts(answer_str)
+    answer(context, answer_str)
+  end
+
   def handle({:command, :showlanguages, _msg}, context) do
     api_response = DeeplRequests.get_languages()
 

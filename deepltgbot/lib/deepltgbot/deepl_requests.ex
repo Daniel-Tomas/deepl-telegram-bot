@@ -16,7 +16,6 @@ defmodule Deepltgbot.DeeplRequests do
   end
 
   def get_languages() do
-
     response_tuple = post("/languages", %{type: "source"})
 
     check_and_decode(response_tuple)
