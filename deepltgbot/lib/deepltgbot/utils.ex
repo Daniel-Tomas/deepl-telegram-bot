@@ -2,6 +2,7 @@ defmodule Deepltgbot.Utils do
   alias Decimal
   alias Deepltgbot.DeeplRequests
 
+  @thumb_url "https://cdn-icons.flaticon.com/png/512/3988/premium/3988077.png?token=exp=1652215740~hmac=3dc7d683adc86e6e9114d1b21d97054a"
 
   def get_progress_bar_str(ratio_progress, bar_length \\ 20, fill_char \\ "▮", empty_char \\ "▯") do
     filled_length = trunc(bar_length * ratio_progress)
@@ -48,6 +49,7 @@ defmodule Deepltgbot.Utils do
       "FI" => " \u{1F1EB}\u{1F1EE}",
       "FR" => " \u{1F1EB}\u{1F1F7}",
       "HU" => " \u{1F1ED}\u{1F1FA}",
+      "ID" => " \u{1F1EE}\u{1F1E9}",
       "IT" => " \u{1F1EE}\u{1F1F9}",
       "JA" => " \u{1F1EF}\u{1F1F5}",
       "LT" => " \u{1F1F1}\u{1F1F9}",
@@ -60,7 +62,86 @@ defmodule Deepltgbot.Utils do
       "SK" => " \u{1F1F8}\u{1F1F0}",
       "SL" => " \u{1F1F8}\u{1F1EE}",
       "SV" => " \u{1F1F8}\u{1F1EA}",
+      "TR" => " \u{1F1F9}\u{1F1F7}",
       "ZH" => " \u{1F1E8}\u{1F1F3}"
     }
+  end
+
+  def parse_and_translate(msg) do
+    api_response_languages = DeeplRequests.get_languages()
+    available_languages = for map <- api_response_languages, do: map["language"]
+
+    args = String.split(msg)
+
+    if Enum.count(args) === 0 do
+      {:error,
+       "To use the command use /translate <source_language> <target_language> text_to_translate"}
+    else
+      if Enum.member?(available_languages, String.upcase(Enum.at(args, 0))) do
+        if Enum.member?(available_languages, String.upcase(Enum.at(args, 1))) do
+          source_language = String.upcase(Enum.at(args, 0))
+          target_language = String.upcase(Enum.at(args, 1))
+
+          args = List.delete_at(args, 0)
+          args = List.delete_at(args, 0)
+
+          text_to_translate = Enum.join(args, " ")
+
+          api_response =
+            DeeplRequests.translate(text_to_translate, source_language, target_language)
+
+          translation_map = Enum.at(api_response["translations"], 0)
+          translation = translation_map["text"]
+
+          {:ok,
+           %{
+             text_to_translate: text_to_translate,
+             translation: translation,
+             source_language: source_language,
+             target_language: target_language
+           }}
+        else
+          target_language = String.upcase(Enum.at(args, 0))
+
+          args = List.delete_at(args, 0)
+
+          text_to_translate = Enum.join(args, " ")
+
+          api_response = DeeplRequests.translate(text_to_translate, target_language)
+
+          translation_map = Enum.at(api_response["translations"], 0)
+          translation = translation_map["text"]
+
+          source_language = translation_map["detected_source_language"] |> String.upcase()
+
+          {:ok,
+           %{
+             text_to_translate: text_to_translate,
+             translation: translation,
+             source_language: source_language,
+             target_language: target_language
+           }}
+        end
+      else
+        {:error,
+         """
+           Languages not recognized.
+         Use /showlanguages to know which languages are supported.
+         """}
+      end
+    end
+  end
+
+  def parse_translation_result(translation_result) do
+    case translation_result do
+      {:ok, result} ->
+        _response = """
+        Translating #{inspect(result.text_to_translate)} from #{flag_mapping()[result.source_language]} to #{flag_mapping()[result.target_language]}...
+        #{result.translation}
+        """
+
+      {:error, msg} ->
+        _response = msg
+    end
   end
 end

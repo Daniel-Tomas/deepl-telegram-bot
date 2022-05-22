@@ -10,6 +10,8 @@ defmodule Deepltgbot.Bot do
   command("start")
   command("help", description: "Show bot help")
   command("showlanguages", description: "Show languages availables for translation")
+  command("getusage", description: "Show DeepL API usage")
+  command("translate", description: "Translates given text from one language to another")
 
   middleware(ExGram.Middleware.IgnoreUsername)
 
@@ -52,4 +54,19 @@ defmodule Deepltgbot.Bot do
     #{bot_response}
     """)
   end
+
+  def handle({:command, :translate, %{text: msg}}, context) do
+    async_translate(msg, context)
+  end
+
+  def async_translate(msg, context) do
+    translation_result = Utils.parse_and_translate(msg)
+    response = Utils.parse_translation_result(translation_result)
+
+    if not is_nil(context.update) and Map.has_key?(context.update, :message) do
+      ExGram.send_message(context.update.message.chat.id, response, bot: @bot)
+    end
+  end
+
+  def handle(_, _), do: nil
 end

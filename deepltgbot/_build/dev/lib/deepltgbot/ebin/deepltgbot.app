@@ -1,6 +1,6 @@
 {application,deepltgbot,
              [{applications,[kernel,stdlib,elixir,logger,ex_gram,tesla,
-                             hackney,jason]},
+                             hackney,jason,decimal]},
               {description,"deepltgbot"},
               {modules,['Elixir.Deepltgbot.Application',
                         'Elixir.Deepltgbot.Bot',
