@@ -23,21 +23,39 @@ defmodule Deepltgbot.Utils do
   end
 
   def parse_languages(api_response) do
-    names_list = for map <- api_response, do: map["name"] <> " \u{27A1} "
-    languages_list = for map <- api_response, do: map["language"]
-    flags_languages_list = for map <- languages_list, do: map <> flag_mapping()[map]
+    max_name_lang_map =
+      Enum.max_by(api_response, fn lang_map -> String.length(lang_map["name"]) end)
+
+    max_name_lang_length = String.length(max_name_lang_map["name"]) + 1
+
+    names_list =
+      for lang_map <- api_response do
+        lang_name = lang_map["name"]
+        lang_name_filled_length = String.length(lang_name)
+        empty_length = max_name_lang_length - lang_name_filled_length
+
+        lang_name <> String.duplicate(" ", empty_length) <> "\u{27A1} "
+      end
+
+    languages_list = for lang_map <- api_response, do: lang_map["language"]
+
+    flags_languages_list =
+      for lang_map <- languages_list, do: lang_map <> flag_mapping(lang_map)
 
     arrow_languages_list =
-      for map <- flags_languages_list, do: Enum.join(String.split(map), " \u{27A1} ")
+      for lang_map <- flags_languages_list, do: Enum.join(String.split(lang_map), " \u{27A1} ")
 
     name_languages_zip = Enum.zip(names_list, arrow_languages_list)
-    name_languages_list = for map <- name_languages_zip, do: elem(map, 0) <> elem(map, 1)
+
+    name_languages_list =
+      for lang_map <- name_languages_zip, do: elem(lang_map, 0) <> elem(lang_map, 1)
+
     bot_response = Enum.join(name_languages_list, "\u{000A}")
     bot_response
   end
 
-  def flag_mapping do
-    %{
+  def flag_mapping(code) do
+    flags = %{
       "BG" => " \u{1F1E7}\u{1F1EC}",
       "CS" => " \u{1F1E8}\u{1F1FF}",
       "DA" => " \u{1F1E9}\u{1F1F0}",
@@ -65,6 +83,11 @@ defmodule Deepltgbot.Utils do
       "TR" => " \u{1F1F9}\u{1F1F7}",
       "ZH" => " \u{1F1E8}\u{1F1F3}"
     }
+    if Map.has_key?(flags, code) do
+      flags[code]
+    else
+      " Flag not available"
+    end
   end
 
   def parse_and_translate(msg) do
@@ -136,7 +159,7 @@ defmodule Deepltgbot.Utils do
     case translation_result do
       {:ok, result} ->
         _response = """
-        Translating #{inspect(result.text_to_translate)} from #{flag_mapping()[result.source_language]} to #{flag_mapping()[result.target_language]}...
+        Translating #{inspect(result.text_to_translate)} from #{flag_mapping(result.source_language)} to #{flag_mapping(result.target_language)}...
         #{result.translation}
         """
 

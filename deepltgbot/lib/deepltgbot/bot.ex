@@ -49,10 +49,18 @@ defmodule Deepltgbot.Bot do
 
     bot_response = Utils.parse_languages(api_response)
 
-    answer(context, """
-    AVAILABLE LANGUAGES:
+    answer_str = """
+    ```
+    Available languages:
     #{bot_response}
-    """)
+    ```
+    """
+
+    answer(
+      context,
+      answer_str,
+      parse_mode: "MarkdownV2"
+    )
   end
 
   def handle({:command, :translate, %{text: msg}}, context) do
