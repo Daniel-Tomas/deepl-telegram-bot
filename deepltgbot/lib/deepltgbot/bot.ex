@@ -1,5 +1,5 @@
 defmodule Deepltgbot.Bot do
-  alias Deepltgbot.{DeeplRequests, Utils}
+  alias Deepltgbot.{DeeplRequests, Utils, TranslateSupervisor}
 
   @bot :deepltgbot
 
@@ -56,7 +56,7 @@ defmodule Deepltgbot.Bot do
   end
 
   def handle({:command, :translate, %{text: msg}}, context) do
-    async_translate(msg, context)
+    TranslateSupervisor.start_link([msg, context])
   end
 
   def async_translate(msg, context) do
