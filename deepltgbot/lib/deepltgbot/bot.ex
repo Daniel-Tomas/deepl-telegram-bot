@@ -9,8 +9,8 @@ defmodule Deepltgbot.Bot do
 
   command("start")
   command("help", description: "Show bot help")
-  command("showlanguages", description: "Show languages availables for translation")
   command("getusage", description: "Show DeepL API usage")
+  command("showlanguages", description: "Show languages availables for translation")
   command("translate", description: "Translates given text from one language to another")
 
   middleware(ExGram.Middleware.IgnoreUsername)
@@ -22,12 +22,24 @@ defmodule Deepltgbot.Bot do
   end
 
   def handle({:command, :help, _msg}, context) do
-    answer(context, """
+    bot_username = ExGram.get_me!(bot: @bot).username
+
+    answer_str = """
     Hello! \u{1F600} Welcome to the DeepL Bot
-    Use /showlanguages to see the available languages for translation
-    Use /translate source_language target_language text to translate the text from source_language to target_language
-    Use /translate target_language text to translate the text to target_language detecting the source_language
-    """)
+    Use "/showlanguages" to see the available languages for translation
+    Use "/getusage" to see the DeepL API usage
+
+    Use "/translate source_language target_language text"\nto translate the text from source_language to target_language
+    Use "/translate target_language text"\nto translate the text to target_language detecting the source_language
+
+    To use translation in any chat write \n"@#{bot_username} source_language target_language text"\nto translate the text from source_language to target_language
+    To use translation in any chat write \n"@#{bot_username} target_language text"\nto translate the text to target_language detecting the source_language
+    """
+
+    answer(
+      context,
+      answer_str
+    )
   end
 
   def handle({:command, :getusage, _msg}, context) do
@@ -40,8 +52,10 @@ defmodule Deepltgbot.Bot do
     #{Utils.get_progress_bar_str(ratio_progress)}
     """
 
-    IO.puts(answer_str)
-    answer(context, answer_str)
+    answer(
+      context,
+      answer_str
+    )
   end
 
   def handle({:command, :showlanguages, _msg}, context) do
@@ -73,6 +87,20 @@ defmodule Deepltgbot.Bot do
 
     if not is_nil(context.update) and Map.has_key?(context.update, :message) do
       ExGram.send_message(context.update.message.chat.id, response, bot: @bot)
+    end
+  end
+
+  def handle({:inline_query, inline_query}, context) do
+    msg = inline_query.query
+    translation_result = Utils.parse_and_translate(msg)
+
+    case Utils.get_query_result(translation_result) do
+      :error ->
+        nil
+
+      translation_query_result ->
+        results = [translation_query_result]
+        answer_inline_query(context, results)
     end
   end
 

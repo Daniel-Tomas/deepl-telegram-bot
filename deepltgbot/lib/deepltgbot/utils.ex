@@ -7,8 +7,6 @@ defmodule Deepltgbot.Utils do
   def get_progress_bar_str(ratio_progress, bar_length \\ 20, fill_char \\ "▮", empty_char \\ "▯") do
     filled_length = trunc(bar_length * ratio_progress)
     empty_length = bar_length - filled_length
-    IO.puts(filled_length)
-    IO.puts(empty_length)
 
     progress_bar =
       String.duplicate(fill_char, filled_length) <> String.duplicate(empty_char, empty_length)
@@ -39,8 +37,7 @@ defmodule Deepltgbot.Utils do
 
     languages_list = for lang_map <- api_response, do: lang_map["language"]
 
-    flags_languages_list =
-      for lang_map <- languages_list, do: lang_map <> flag_mapping(lang_map)
+    flags_languages_list = for lang_map <- languages_list, do: lang_map <> flag_mapping(lang_map)
 
     arrow_languages_list =
       for lang_map <- flags_languages_list, do: Enum.join(String.split(lang_map), " \u{27A1} ")
@@ -83,6 +80,7 @@ defmodule Deepltgbot.Utils do
       "TR" => " \u{1F1F9}\u{1F1F7}",
       "ZH" => " \u{1F1E8}\u{1F1F3}"
     }
+
     if Map.has_key?(flags, code) do
       flags[code]
     else
@@ -92,7 +90,7 @@ defmodule Deepltgbot.Utils do
 
   def parse_and_translate(msg) do
     api_response_languages = DeeplRequests.get_languages()
-    available_languages = for map <- api_response_languages, do: map["language"]
+    available_languages = for lang_map <- api_response_languages, do: lang_map["language"]
 
     args = String.split(msg)
 
@@ -165,6 +163,26 @@ defmodule Deepltgbot.Utils do
 
       {:error, msg} ->
         _response = msg
+    end
+  end
+
+  def get_query_result(translation_result, id \\ 0) do
+    case translation_result do
+      {:error, _} ->
+        :error
+
+      {:ok, result} ->
+        _query_result = %ExGram.Model.InlineQueryResultArticle{
+          type: "article",
+          id: "#{id}",
+          title:
+            "Translating from #{flag_mapping(result.source_language)} to #{flag_mapping(result.target_language)}...",
+          description: result.translation,
+          input_message_content: %ExGram.Model.InputTextMessageContent{
+            message_text: result.translation
+          },
+          thumb_url: @thumb_url
+        }
     end
   end
 end
