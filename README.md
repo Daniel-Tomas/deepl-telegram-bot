@@ -50,10 +50,19 @@ To run the bot, you must fullfil the following requirements:
 
 To deploy _Deep Translator_ and make your bot work:
   
+- Save the environment variable `BOT_TOKEN` with your Telegram Bot key
 - Save the environment variable `DEEPL_TOKEN` with your DeepL API key
-- Save the enviorment variable `BOT_TOKEN` with your Telegram Bot key
-- Export the enviroment variables
-- Install dependencies with `mix deps.get`
-- Compile the project with `mix compile`
-- Start your bot with `mix run --no-halt`
+- Export the environment variables:
+ 
+        export BOT_TOKEN DEEPL_TOKEN
+- Install dependencies:
+    
+        mix deps.get
+- Compile the project:
+   
+        mix compile
+- Start your bot:
+   
+        mix run --no-halt
+
 
