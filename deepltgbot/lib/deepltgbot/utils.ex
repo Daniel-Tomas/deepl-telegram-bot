@@ -111,16 +111,7 @@ defmodule Deepltgbot.Utils do
           api_response =
             DeeplRequests.translate(text_to_translate, source_language, target_language)
 
-          translation_map = Enum.at(api_response["translations"], 0)
-          translation = translation_map["text"]
-
-          {:ok,
-           %{
-             text_to_translate: text_to_translate,
-             translation: translation,
-             source_language: source_language,
-             target_language: target_language
-           }}
+          get_translation_result(api_response, text_to_translate, source_language, target_language)
         else
           target_language = String.upcase(Enum.at(args, 0))
 
@@ -130,18 +121,7 @@ defmodule Deepltgbot.Utils do
 
           api_response = DeeplRequests.translate(text_to_translate, target_language)
 
-          translation_map = Enum.at(api_response["translations"], 0)
-          translation = translation_map["text"]
-
-          source_language = translation_map["detected_source_language"] |> String.upcase()
-
-          {:ok,
-           %{
-             text_to_translate: text_to_translate,
-             translation: translation,
-             source_language: source_language,
-             target_language: target_language
-           }}
+          get_translation_result(api_response, text_to_translate, target_language)
         end
       else
         {:error,
@@ -151,6 +131,34 @@ defmodule Deepltgbot.Utils do
          """}
       end
     end
+  end
+
+  def get_translation_result(api_response, text_to_translate, target_language) do
+    translation_map = Enum.at(api_response["translations"], 0)
+    translation = translation_map["text"]
+
+    source_language = translation_map["detected_source_language"] |> String.upcase()
+
+    {:ok,
+     %{
+       text_to_translate: text_to_translate,
+       translation: translation,
+       source_language: source_language,
+       target_language: target_language
+     }}
+  end
+
+  def get_translation_result(api_response, text_to_translate, source_language, target_language) do
+    translation_map = Enum.at(api_response["translations"], 0)
+    translation = translation_map["text"]
+
+    {:ok,
+     %{
+       text_to_translate: text_to_translate,
+       translation: translation,
+       source_language: source_language,
+       target_language: target_language
+     }}
   end
 
   def parse_translation_result(translation_result) do

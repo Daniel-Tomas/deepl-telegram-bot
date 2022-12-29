@@ -99,8 +99,17 @@ defmodule Deepltgbot.Bot do
         nil
 
       translation_query_result ->
-        results = [translation_query_result]
-        answer_inline_query(context, results)
+
+        api_response = DeeplRequests.translate(translation_result.translation, translation_result.target_language, translation_result.source_language)
+        translation_result_reversed = Utils.get_translation_result(api_response,translation_result.translation, translation_result.target_language, translation_result.source_language)
+
+        case Utils.get_query_result(translation_result_reversed) do
+          :error ->
+            nil
+
+          translation_query_result_reversed ->
+            results = [translation_query_result,translation_query_result_reversed]
+            answer_inline_query(context, results)
     end
   end
 
