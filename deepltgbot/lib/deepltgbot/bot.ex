@@ -110,6 +110,7 @@ defmodule Deepltgbot.Bot do
           translation_query_result_reversed ->
             results = [translation_query_result,translation_query_result_reversed]
             answer_inline_query(context, results)
+          end
     end
   end
 
